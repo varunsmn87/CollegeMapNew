@@ -17,12 +17,12 @@
         header { 
             background: #2c3e50; 
             color: white; 
-            padding: 15px; 
+            padding: 10px; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        h1 { margin: 0; font-size: 1.2rem; }
-        p.subtitle { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.8; }
+        h1 { margin: 0; font-size: 1.1rem; }
+        p.subtitle { margin: 2px 0 0; font-size: 0.8rem; opacity: 0.8; }
 
         /* The Map Wrapper */
         #map-container {
@@ -30,10 +30,12 @@
             display: inline-block;
             width: 100%;
             max-width: 1000px;
-            margin: 10px auto;
-            border: 1px solid #ddd;
+            margin: 0 auto;
+            border-bottom: 1px solid #ddd;
             background: #e0e0e0;
             overflow: hidden;
+            /* Prevent highlighting on tap */
+            -webkit-tap-highlight-color: transparent;
         }
 
         #campus-map {
@@ -42,27 +44,45 @@
             height: auto;
         }
 
-        /* The Pins */
+        /* --- THE NEW SMALLER PINS --- */
         .pin {
             position: absolute;
-            width: 24px;
-            height: 24px;
-            background: #e74c3c; /* Red for Depts */
-            border: 2px solid white;
+            width: 12px;        /* Reduced from 24px */
+            height: 12px;       /* Reduced from 24px */
+            background: #e74c3c; /* Red */
+            border: 1.5px solid white;
             border-radius: 50%;
             cursor: pointer;
             transform: translate(-50%, -50%);
             z-index: 10;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
             animation: popIn 0.3s ease-out;
+        }
+
+        /* Hidden Touch Area: Makes the click target bigger than the visible dot */
+        .pin::after {
+            content: '';
+            position: absolute;
+            top: -10px; bottom: -10px;
+            left: -10px; right: -10px;
         }
         
         /* Different Pin Colors */
-        .pin.direction { background: #3498db; width: 18px; height: 18px; } /* Blue for gates */
-        .pin.special { background: #f1c40f; transform: translate(-50%, -50%) scale(1.1); } /* Yellow for ISRO */
+        .pin.direction { 
+            background: #3498db; /* Blue */
+            width: 10px; height: 10px; /* Even smaller for gates */
+            z-index: 5;
+        } 
+        
+        .pin.special { 
+            background: #f1c40f; /* Yellow */
+            width: 14px; height: 14px; 
+            z-index: 15;
+            border: 2px solid #fff;
+        } 
 
-        .pin:hover { transform: translate(-50%, -50%) scale(1.2); z-index: 20; }
-        .pin:active { transform: translate(-50%, -50%) scale(0.9); }
+        /* Active State (Visual Feedback) */
+        .pin:active { transform: translate(-50%, -50%) scale(1.5); }
 
         @keyframes popIn {
             from { transform: translate(-50%, -50%) scale(0); }
@@ -75,10 +95,10 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            max-height: 60vh; /* Takes up max 60% of screen height */
+            max-height: 50vh; /* Takes up half screen max */
             background: white;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
             box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
             z-index: 1000;
             transform: translateY(110%); /* Hidden by default */
@@ -90,62 +110,48 @@
         #info-card.visible { transform: translateY(0); }
 
         .card-header {
-            padding: 15px 20px;
+            padding: 12px 20px;
             border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: #f8f9fa;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
         }
 
-        .card-header h2 { margin: 0; font-size: 1.2rem; color: #2c3e50; }
+        .card-header h2 { margin: 0; font-size: 1.1rem; color: #2c3e50; }
         .close-btn { 
             background: none; 
             border: none; 
-            font-size: 24px; 
+            font-size: 28px; 
             color: #777; 
             cursor: pointer; 
-            padding: 0 5px;
+            padding: 0 10px;
+            line-height: 1;
         }
 
         .card-body {
-            padding: 20px;
-            overflow-y: auto; /* Scrollable content */
+            padding: 15px 20px;
+            overflow-y: auto;
             text-align: left;
-            font-size: 0.95rem;
-            line-height: 1.5;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
 
         .event-list {
-            padding-left: 20px;
+            padding-left: 18px;
             margin: 5px 0;
-            color: #555;
+            color: #444;
         }
-        
-        .event-list li { margin-bottom: 5px; }
-        
-        /* Pin Label (optional, visible on hover on desktop) */
-        .pin-label {
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
-        }
-        .pin:hover .pin-label { opacity: 1; }
+        .event-list li { margin-bottom: 6px; }
 
-        /* Desktop Tweaks */
+        /* Desktop Tweaks: Make pins slightly larger on big screens */
         @media (min-width: 768px) {
+            .pin { width: 18px; height: 18px; border: 2px solid white; }
+            .pin.direction { width: 14px; height: 14px; }
+            .pin:hover { transform: translate(-50%, -50%) scale(1.3); }
+            
             #info-card {
                 bottom: 20px;
                 left: 50%;
@@ -168,7 +174,7 @@
 
     <header>
         <h1>Maharaja's Exhibition 2026</h1>
-        <p class="subtitle">Tap a pin to view events</p>
+        <p class="subtitle">Tap any dot to see events</p>
     </header>
 
     <div id="map-container">
@@ -193,87 +199,87 @@
             // --- MAIN BLOCK ---
             {
                 name: "English", x: 54.6, y: 28.6, type: "dept",
-                events: "<ul><li>Main Hall: History of English Lit & AI</li><li>Shakespearean Characters Enactment</li><li>Literary Ramp Walk & Drama</li><li>Games Corner: Spelling Bee, Scrabble</li></ul>"
+                events: "<ul class='event-list'><li>Main Hall: History of English Lit & AI</li><li>Shakespearean Characters Enactment</li><li>Literary Ramp Walk & Drama</li><li>Games Corner: Spelling Bee, Scrabble</li></ul>"
             },
             {
                 name: "Mathematics", x: 58.6, y: 36.2, type: "dept",
-                events: "<ul><li>Room 81: Visual Mathematics</li><li>Room 110: Antique Instruments</li><li>Room 108: Game Zone</li><li>Corridors: Historical Problems</li></ul>"
+                events: "<ul class='event-list'><li>Room 81: Visual Mathematics</li><li>Room 110: Antique Instruments</li><li>Room 108: Game Zone</li><li>Corridors: Historical Problems</li></ul>"
             },
             {
                 name: "Statistics", x: 67.3, y: 36.2, type: "dept",
-                events: "<ul><li>Data Visualizations (3D Graphs)</li><li>Galton Board (Central Limit Theorem)</li><li>Probability & Randomness Games</li><li>Life Expectancy Graphs</li></ul>"
+                events: "<ul class='event-list'><li>Data Visualizations (3D Graphs)</li><li>Galton Board (Central Limit Theorem)</li><li>Probability & Randomness Games</li><li>Life Expectancy Graphs</li></ul>"
             },
             {
                 name: "Chemistry", x: 59.6, y: 52.4, type: "dept",
-                events: "<ul><li>Heritage meets Modern Chemistry</li><li>Food Adulteration Detection</li><li>Soil & Water Quality Testing</li><li>Hands-on Experiments & Live Demos</li></ul>"
+                events: "<ul class='event-list'><li>Heritage meets Modern Chemistry</li><li>Food Adulteration Detection</li><li>Soil & Water Quality Testing</li><li>Hands-on Experiments & Live Demos</li></ul>"
             },
             {
                 name: "Physics", x: 59.8, y: 75.2, type: "dept",
-                events: "<ul><li>Tesla Coil Demo & Live Wire</li><li>Dark Room: Laser & Plasma Tech</li><li>Drone Technology (GNR)</li><li>Antique Instrument Showcase</li><li>Cosmic Theatre & World of Motion</li></ul>"
+                events: "<ul class='event-list'><li>Tesla Coil Demo & Live Wire</li><li>Dark Room: Laser & Plasma Tech</li><li>Drone Technology (GNR)</li><li>Antique Instrument Showcase</li><li>Cosmic Theatre & World of Motion</li></ul>"
             },
             {
                 name: "Botany", x: 42.8, y: 90.3, type: "dept",
-                events: "<ul><li>Plant Diversity & Aquatic Plants</li><li>Mushroom & Microgreens (Room 126)</li><li>Indoor Gardening (Room 130)</li><li>First Floor: DNA, Evolutionary Garden, Liquid Tree</li></ul>"
+                events: "<ul class='event-list'><li>Plant Diversity & Aquatic Plants</li><li>Mushroom & Microgreens (Room 126)</li><li>Indoor Gardening (Room 130)</li><li>First Floor: DNA, Evolutionary Garden, Liquid Tree</li></ul>"
             },
             {
                 name: "Zoology", x: 33.9, y: 83.0, type: "dept",
-                events: "<ul><li>Human Evolution Gallery</li><li>Jurassic World & Aquatic World</li><li>Zoology Museum & Aquarium</li><li>Happy Hormone & Polar Gallery</li></ul>"
+                events: "<ul class='event-list'><li>Human Evolution Gallery</li><li>Jurassic World & Aquatic World</li><li>Zoology Museum & Aquarium</li><li>Happy Hormone & Polar Gallery</li></ul>"
             },
             {
-                name: "Sanskrit", x: 33.5, y: 70.0, type: "dept", // Adjusted Y to avoid overlap with Botany
-                events: "<ul><li>Ancient Indian Number System (Room 114)</li><li>Rare Books & Manuscripts</li><li>Movies, Plays & IKS</li></ul>"
+                name: "Sanskrit", x: 33.5, y: 70.0, type: "dept",
+                events: "<ul class='event-list'><li>Ancient Indian Number System (Room 114)</li><li>Rare Books & Manuscripts</li><li>Movies, Plays & IKS</li></ul>"
             },
             {
                 name: "Malayalam", x: 33.6, y: 58.7, type: "dept",
-                events: "<ul><li>Cinema History Presentation</li><li>Heritage Corner & Festivals</li><li>Live Quiz: Riddles & Literature</li></ul>"
+                events: "<ul class='event-list'><li>Cinema History Presentation</li><li>Heritage Corner & Festivals</li><li>Live Quiz: Riddles & Literature</li></ul>"
             },
             {
                 name: "Hindi", x: 32.2, y: 53.6, type: "dept",
-                events: "<ul><li>Poster & Photo Exhibition</li><li>Books Exhibition (Room 40)</li><li>Food Court (Room 38)</li></ul>"
+                events: "<ul class='event-list'><li>Poster & Photo Exhibition</li><li>Books Exhibition (Room 40)</li><li>Food Court (Room 38)</li></ul>"
             },
             {
                 name: "Philosophy", x: 31.1, y: 47.7, type: "dept",
-                events: "<ul><li>Philosophical Exhibition (Room 101)</li></ul>"
+                events: "<ul class='event-list'><li>Philosophical Exhibition (Room 101)</li></ul>"
             },
             {
                 name: "Economics", x: 33.8, y: 39.8, type: "dept",
-                events: "<ul><li>Growth Models & Budget Analysis</li><li>Sustainability & Women Participation</li><li>Still Models & Posters (Corridor)</li></ul>"
+                events: "<ul class='event-list'><li>Growth Models & Budget Analysis</li><li>Sustainability & Women Participation</li><li>Still Models & Posters (Corridor)</li></ul>"
             },
             {
                 name: "History", x: 33.1, y: 29.6, type: "dept",
-                events: "<ul><li>Commemorating Gandhi's Visit</li><li>Centenary Legacy of Dept</li><li>Portraying Kochi History</li></ul>"
+                events: "<ul class='event-list'><li>Commemorating Gandhi's Visit</li><li>Centenary Legacy of Dept</li><li>Portraying Kochi History</li></ul>"
             },
             
             // --- RIGHT SIDE BLOCKS ---
             {
                 name: "Political Science", x: 73.9, y: 66.3, type: "dept",
-                events: "<ul><li>Speeches of Social Figures</li><li>Political Cartoon Exhibition</li><li>Constitution Corner</li><li>Opinion Survey & Quiz</li></ul>"
+                events: "<ul class='event-list'><li>Speeches of Social Figures</li><li>Political Cartoon Exhibition</li><li>Constitution Corner</li><li>Opinion Survey & Quiz</li></ul>"
             },
             {
                 name: "Commerce", x: 74.4, y: 74.4, type: "dept",
-                events: "<ul><li>Entrepreneurship Stalls</li><li>Banking & Online Trading</li><li>Food Stalls & Games Corner</li></ul>"
+                events: "<ul class='event-list'><li>Entrepreneurship Stalls</li><li>Banking & Online Trading</li><li>Food Stalls & Games Corner</li></ul>"
             },
             {
                 name: "Islamic History", x: 89.1, y: 74.9, type: "dept",
-                events: "<ul><li>Thaqafa: Cultural Exhibition</li><li>Malabar Food Counter</li><li>Mehndi Corner</li><li>West Asian Map Quiz</li></ul>"
+                events: "<ul class='event-list'><li>Thaqafa: Cultural Exhibition</li><li>Malabar Food Counter</li><li>Mehndi Corner</li><li>West Asian Map Quiz</li></ul>"
             },
 
             // --- ACADEMIC BLOCK (LEFT) ---
             {
                 name: "Arabic", x: 22.1, y: 66.0, type: "dept",
-                events: "<ul><li>World of Arabic (Coins, Currency)</li><li>Live Calligraphy & Mehandi</li><li>Learn Arabic in Seconds</li></ul>"
+                events: "<ul class='event-list'><li>World of Arabic (Coins, Currency)</li><li>Live Calligraphy & Mehandi</li><li>Learn Arabic in Seconds</li></ul>"
             },
             {
                 name: "Archaeology", x: 18.4, y: 65.1, type: "dept",
-                events: "<ul><li>Muziris Heritage Project</li><li>Recent Excavations (Meenachil)</li></ul>"
+                events: "<ul class='event-list'><li>Muziris Heritage Project</li><li>Recent Excavations (Meenachil)</li></ul>"
             },
             {
                 name: "Geology", x: 10.8, y: 63.7, type: "dept",
-                events: "<ul><li>Minerals, Rocks & Fossils</li><li>Geology Field Equipment</li><li>Quiz Competition</li></ul>"
+                events: "<ul class='event-list'><li>Minerals, Rocks & Fossils</li><li>Geology Field Equipment</li><li>Quiz Competition</li></ul>"
             },
             {
                 name: "Music", x: 12.0, y: 68.8, type: "dept",
-                events: "<ul><li>Rare Music Instruments (Room 323)</li><li>Live Performances (Room 326)</li></ul>"
+                events: "<ul class='event-list'><li>Rare Music Instruments (Room 323)</li><li>Live Performances (Room 326)</li></ul>"
             },
 
             // --- SPECIAL MARKERS ---
@@ -311,14 +317,12 @@
                 pin.style.left = loc.x + '%';
                 pin.style.top = loc.y + '%';
                 
-                // Add tooltip label
-                const label = document.createElement('div');
-                label.className = 'pin-label';
-                label.innerText = loc.name;
-                pin.appendChild(label);
-
                 pin.onclick = (e) => {
                     e.stopPropagation();
+                    // Reset all other pins
+                    document.querySelectorAll('.pin').forEach(p => p.style.transform = 'translate(-50%, -50%)');
+                    // Scale this pin to show it is active
+                    e.target.style.transform = 'translate(-50%, -50%) scale(1.5)';
                     showCard(loc);
                 };
                 pinsLayer.appendChild(pin);
@@ -333,14 +337,12 @@
 
         function hideCard() {
             infoCard.classList.remove('visible');
+            document.querySelectorAll('.pin').forEach(p => p.style.transform = 'translate(-50%, -50%)');
         }
 
         closeBtn.onclick = hideCard;
-        
-        // Clicking anywhere on map closes the card
         mapContainer.onclick = hideCard;
 
-        // Start
         renderPins();
     </script>
 </body>
