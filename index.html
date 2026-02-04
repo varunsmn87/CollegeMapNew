@@ -3,29 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mahaajas College Exhibition Map</title>
+    <title>Maharaja's College Exhibition Map</title>
     <style>
         /* === CSS STYLES === */
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f6; text-align: center; }
-        header { background: #2c3e50; color: white; padding: 15px; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            background: #f4f7f6; 
+            text-align: center; 
+            overflow-x: hidden;
+        }
+        
+        header { 
+            background: #2c3e50; 
+            color: white; 
+            padding: 15px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        h1 { margin: 0; font-size: 1.2rem; }
+        p.subtitle { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.8; }
 
         /* The Map Wrapper */
         #map-container {
             position: relative;
             display: inline-block;
-            max-width: 100%;
-            margin: 20px auto;
-            border: 2px solid #ddd;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 1000px;
+            margin: 10px auto;
+            border: 1px solid #ddd;
+            background: #e0e0e0;
+            overflow: hidden;
         }
 
         #campus-map {
             display: block;
-            width: 100%; /* Responsive */
+            width: 100%; 
             height: auto;
-            max-width: 1200px; 
-            min-width: 300px; /* Ensures map has size even if image loads slow */
-            background-color: #ddd; /* Grey placeholder color */
         }
 
         /* The Pins */
@@ -33,51 +47,128 @@
             position: absolute;
             width: 24px;
             height: 24px;
-            background: #e74c3c; /* Red */
+            background: #e74c3c; /* Red for Depts */
             border: 2px solid white;
             border-radius: 50%;
             cursor: pointer;
             transform: translate(-50%, -50%);
             z-index: 10;
-            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            animation: popIn 0.3s ease-out;
         }
-        .pin:hover { transform: translate(-50%, -50%) scale(1.3); }
+        
+        /* Different Pin Colors */
+        .pin.direction { background: #3498db; width: 18px; height: 18px; } /* Blue for gates */
+        .pin.special { background: #f1c40f; transform: translate(-50%, -50%) scale(1.1); } /* Yellow for ISRO */
 
-        .pin.stair-pin {
-            background: #f1c40f; /* Yellow */
-            border-radius: 4px; /* Square */
-            width: 20px; height: 20px;
+        .pin:hover { transform: translate(-50%, -50%) scale(1.2); z-index: 20; }
+        .pin:active { transform: translate(-50%, -50%) scale(0.9); }
+
+        @keyframes popIn {
+            from { transform: translate(-50%, -50%) scale(0); }
+            to { transform: translate(-50%, -50%) scale(1); }
         }
 
         /* The Pop-up Info Card */
         #info-card {
             position: fixed;
-            bottom: 20px;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            max-height: 60vh; /* Takes up max 60% of screen height */
+            background: white;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transform: translateY(110%); /* Hidden by default */
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #info-card.visible { transform: translateY(0); }
+
+        .card-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        .card-header h2 { margin: 0; font-size: 1.2rem; color: #2c3e50; }
+        .close-btn { 
+            background: none; 
+            border: none; 
+            font-size: 24px; 
+            color: #777; 
+            cursor: pointer; 
+            padding: 0 5px;
+        }
+
+        .card-body {
+            padding: 20px;
+            overflow-y: auto; /* Scrollable content */
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .event-list {
+            padding-left: 20px;
+            margin: 5px 0;
+            color: #555;
+        }
+        
+        .event-list li { margin-bottom: 5px; }
+        
+        /* Pin Label (optional, visible on hover on desktop) */
+        .pin-label {
+            position: absolute;
+            top: -25px;
             left: 50%;
             transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 5px 30px rgba(0,0,0,0.3);
-            z-index: 100;
-            text-align: left;
-            display: none; /* Hidden by default */
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
         }
-        #info-card.visible { display: block; }
-        #close-card { float: right; border: none; background: none; font-size: 24px; cursor: pointer; }
-        .highlight { color: #e74c3c; font-weight: bold; }
-        .debug-toggle { font-size: 0.8rem; background: #34495e; padding: 5px 10px; border-radius: 4px; display: inline-block; margin-top: 10px; }
+        .pin:hover .pin-label { opacity: 1; }
+
+        /* Desktop Tweaks */
+        @media (min-width: 768px) {
+            #info-card {
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%) translateY(20px);
+                width: 400px;
+                border-radius: 12px;
+                max-height: 80vh;
+                opacity: 0;
+                pointer-events: none;
+            }
+            #info-card.visible {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+                pointer-events: all;
+            }
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Mahaajas College Navigation</h1>
-        <label class="debug-toggle">
-            <input type="checkbox" id="debugMode"> 🔧 Developer Mode (Click map to get coords)
-        </label>
+        <h1>Maharaja's Exhibition 2026</h1>
+        <p class="subtitle">Tap a pin to view events</p>
     </header>
 
     <div id="map-container">
@@ -86,56 +177,146 @@
     </div>
 
     <div id="info-card">
-        <button id="close-card">×</button>
-        <h2 id="card-title">Department Name</h2>
-        <p>⭐ <span id="card-attraction">Attraction</span></p>
-        <p>📍 <span id="card-stairs">Stairs Location</span></p>
+        <div class="card-header">
+            <h2 id="card-title">Department</h2>
+            <button class="close-btn" id="close-card">×</button>
+        </div>
+        <div class="card-body">
+            <strong>🎪 Highlights & Events:</strong>
+            <div id="card-content"></div>
+        </div>
     </div>
 
     <script>
-        /* === JAVASCRIPT LOGIC === */
-        
-        // 1. DATA: Add your 23 departments here
+        /* === DATA CONFIGURATION === */
         const locations = [
+            // --- MAIN BLOCK ---
             {
-                id: 1,
-                name: "Main Auditorium",
-                type: "attraction",
-                x: 22.5, y: 84.0, 
-                attraction: "Inaugural Ceremony",
-                stairs: "Ramps at main entry"
+                name: "English", x: 54.6, y: 28.6, type: "dept",
+                events: "<ul><li>Main Hall: History of English Lit & AI</li><li>Shakespearean Characters Enactment</li><li>Literary Ramp Walk & Drama</li><li>Games Corner: Spelling Bee, Scrabble</li></ul>"
             },
             {
-                id: 2,
-                name: "Physics Block",
-                type: "attraction",
-                x: 65.2, y: 78.5,
-                attraction: "Tesla Coil Demo",
-                stairs: "Spiral stairs near Zoology"
+                name: "Mathematics", x: 58.6, y: 36.2, type: "dept",
+                events: "<ul><li>Room 81: Visual Mathematics</li><li>Room 110: Antique Instruments</li><li>Room 108: Game Zone</li><li>Corridors: Historical Problems</li></ul>"
             },
             {
-                id: 3,
-                name: "Central Circle",
-                type: "attraction",
-                x: 54.0, y: 45.0,
-                attraction: "Meeting Point",
-                stairs: "N/A"
+                name: "Statistics", x: 67.3, y: 36.2, type: "dept",
+                events: "<ul><li>Data Visualizations (3D Graphs)</li><li>Galton Board (Central Limit Theorem)</li><li>Probability & Randomness Games</li><li>Life Expectancy Graphs</li></ul>"
+            },
+            {
+                name: "Chemistry", x: 59.6, y: 52.4, type: "dept",
+                events: "<ul><li>Heritage meets Modern Chemistry</li><li>Food Adulteration Detection</li><li>Soil & Water Quality Testing</li><li>Hands-on Experiments & Live Demos</li></ul>"
+            },
+            {
+                name: "Physics", x: 59.8, y: 75.2, type: "dept",
+                events: "<ul><li>Tesla Coil Demo & Live Wire</li><li>Dark Room: Laser & Plasma Tech</li><li>Drone Technology (GNR)</li><li>Antique Instrument Showcase</li><li>Cosmic Theatre & World of Motion</li></ul>"
+            },
+            {
+                name: "Botany", x: 42.8, y: 90.3, type: "dept",
+                events: "<ul><li>Plant Diversity & Aquatic Plants</li><li>Mushroom & Microgreens (Room 126)</li><li>Indoor Gardening (Room 130)</li><li>First Floor: DNA, Evolutionary Garden, Liquid Tree</li></ul>"
+            },
+            {
+                name: "Zoology", x: 33.9, y: 83.0, type: "dept",
+                events: "<ul><li>Human Evolution Gallery</li><li>Jurassic World & Aquatic World</li><li>Zoology Museum & Aquarium</li><li>Happy Hormone & Polar Gallery</li></ul>"
+            },
+            {
+                name: "Sanskrit", x: 33.5, y: 70.0, type: "dept", // Adjusted Y to avoid overlap with Botany
+                events: "<ul><li>Ancient Indian Number System (Room 114)</li><li>Rare Books & Manuscripts</li><li>Movies, Plays & IKS</li></ul>"
+            },
+            {
+                name: "Malayalam", x: 33.6, y: 58.7, type: "dept",
+                events: "<ul><li>Cinema History Presentation</li><li>Heritage Corner & Festivals</li><li>Live Quiz: Riddles & Literature</li></ul>"
+            },
+            {
+                name: "Hindi", x: 32.2, y: 53.6, type: "dept",
+                events: "<ul><li>Poster & Photo Exhibition</li><li>Books Exhibition (Room 40)</li><li>Food Court (Room 38)</li></ul>"
+            },
+            {
+                name: "Philosophy", x: 31.1, y: 47.7, type: "dept",
+                events: "<ul><li>Philosophical Exhibition (Room 101)</li></ul>"
+            },
+            {
+                name: "Economics", x: 33.8, y: 39.8, type: "dept",
+                events: "<ul><li>Growth Models & Budget Analysis</li><li>Sustainability & Women Participation</li><li>Still Models & Posters (Corridor)</li></ul>"
+            },
+            {
+                name: "History", x: 33.1, y: 29.6, type: "dept",
+                events: "<ul><li>Commemorating Gandhi's Visit</li><li>Centenary Legacy of Dept</li><li>Portraying Kochi History</li></ul>"
+            },
+            
+            // --- RIGHT SIDE BLOCKS ---
+            {
+                name: "Political Science", x: 73.9, y: 66.3, type: "dept",
+                events: "<ul><li>Speeches of Social Figures</li><li>Political Cartoon Exhibition</li><li>Constitution Corner</li><li>Opinion Survey & Quiz</li></ul>"
+            },
+            {
+                name: "Commerce", x: 74.4, y: 74.4, type: "dept",
+                events: "<ul><li>Entrepreneurship Stalls</li><li>Banking & Online Trading</li><li>Food Stalls & Games Corner</li></ul>"
+            },
+            {
+                name: "Islamic History", x: 89.1, y: 74.9, type: "dept",
+                events: "<ul><li>Thaqafa: Cultural Exhibition</li><li>Malabar Food Counter</li><li>Mehndi Corner</li><li>West Asian Map Quiz</li></ul>"
+            },
+
+            // --- ACADEMIC BLOCK (LEFT) ---
+            {
+                name: "Arabic", x: 22.1, y: 66.0, type: "dept",
+                events: "<ul><li>World of Arabic (Coins, Currency)</li><li>Live Calligraphy & Mehandi</li><li>Learn Arabic in Seconds</li></ul>"
+            },
+            {
+                name: "Archaeology", x: 18.4, y: 65.1, type: "dept",
+                events: "<ul><li>Muziris Heritage Project</li><li>Recent Excavations (Meenachil)</li></ul>"
+            },
+            {
+                name: "Geology", x: 10.8, y: 63.7, type: "dept",
+                events: "<ul><li>Minerals, Rocks & Fossils</li><li>Geology Field Equipment</li><li>Quiz Competition</li></ul>"
+            },
+            {
+                name: "Music", x: 12.0, y: 68.8, type: "dept",
+                events: "<ul><li>Rare Music Instruments (Room 323)</li><li>Live Performances (Room 326)</li></ul>"
+            },
+
+            // --- SPECIAL MARKERS ---
+            {
+                name: "ISRO Exhibition", x: 85.0, y: 17.1, type: "special",
+                events: "Main Auditorium: ISRO Space Exhibition"
+            },
+            {
+                name: "Way to Subhash Park", x: 40.2, y: 14.9, type: "direction",
+                events: "Exit here for Subhash Park"
+            },
+            {
+                name: "IMA Gate", x: 47.8, y: 96.4, type: "direction",
+                events: "Main Entrance/Exit (IMA House side)"
+            },
+            {
+                name: "Way to Temple", x: 2.2, y: 73.3, type: "direction",
+                events: "Path towards Ernakulathappan Temple"
             }
         ];
 
-        // 2. APP LOGIC
+        /* === APP LOGIC === */
         const mapContainer = document.getElementById('map-container');
         const pinsLayer = document.getElementById('pins-layer');
         const infoCard = document.getElementById('info-card');
-        const debugMode = document.getElementById('debugMode');
+        const cardTitle = document.getElementById('card-title');
+        const cardContent = document.getElementById('card-content');
+        const closeBtn = document.getElementById('close-card');
 
         function renderPins() {
             pinsLayer.innerHTML = '';
             locations.forEach(loc => {
                 const pin = document.createElement('div');
-                pin.className = loc.type === 'stair' ? 'pin stair-pin' : 'pin';
+                pin.className = `pin ${loc.type}`;
                 pin.style.left = loc.x + '%';
                 pin.style.top = loc.y + '%';
+                
+                // Add tooltip label
+                const label = document.createElement('div');
+                label.className = 'pin-label';
+                label.innerText = loc.name;
+                pin.appendChild(label);
+
                 pin.onclick = (e) => {
                     e.stopPropagation();
                     showCard(loc);
@@ -145,25 +326,19 @@
         }
 
         function showCard(data) {
-            document.getElementById('card-title').innerText = data.name;
-            document.getElementById('card-attraction').innerText = data.attraction;
-            document.getElementById('card-stairs').innerText = data.stairs;
+            cardTitle.innerText = data.name;
+            cardContent.innerHTML = data.events;
             infoCard.classList.add('visible');
         }
 
-        document.getElementById('close-card').onclick = () => infoCard.classList.remove('visible');
-        mapContainer.onclick = (e) => {
-            // Close card if clicking map (unless in debug mode)
-            if (!debugMode.checked) infoCard.classList.remove('visible');
-            
-            // Developer Mode Logic
-            if (debugMode.checked) {
-                const rect = mapContainer.getBoundingClientRect();
-                const x = ((e.clientX - rect.left) / rect.width) * 100;
-                const y = ((e.clientY - rect.top) / rect.height) * 100;
-                alert(`COORDINATES COPIED:\nx: ${x.toFixed(1)}, y: ${y.toFixed(1)}`);
-            }
-        };
+        function hideCard() {
+            infoCard.classList.remove('visible');
+        }
+
+        closeBtn.onclick = hideCard;
+        
+        // Clicking anywhere on map closes the card
+        mapContainer.onclick = hideCard;
 
         // Start
         renderPins();
